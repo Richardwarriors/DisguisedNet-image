@@ -214,14 +214,6 @@ class RMT:
 
         (nrows, ncols) = Original[0].shape
 
-        # Print the blocks being used for estimation
-        print("Original blocks for this position:")
-        for idx, block in enumerate(Original):
-            print(f"Original[{idx}]:\n{block}")
-        print("Encrypted blocks for this position:")
-        for idx, block in enumerate(Encrypted):
-            print(f"Encrypted[{idx}]:\n{block}")
-
         R = np.array([[]])
 
         X = Original[0]
@@ -230,13 +222,10 @@ class RMT:
 
             X = np.append(X,Original[j],0)
 
-        print("Stacked X matrix:\n", X)
-
         det = np.linalg.det(np.dot(X.T,X))
-        print("Determinant of X^T X:", det)
 
         if det == 0:
-            print("Singular matrix encountered! Returning empty list.")
+            
             return []
 
         Xbar = np.dot(np.linalg.inv(np.dot(X.T,X)),X.T)
@@ -260,11 +249,11 @@ class RMT:
                 R=np.append(R,r,1)
 
         if np.linalg.det(R)==0:
-            print("Estimated R is singular!")
+            
             return []
 
         else:
-            print("Estimated R:\n", R)
+            
             return R
 
     def Estimate_one_channel(self, Original, Encrypted):
