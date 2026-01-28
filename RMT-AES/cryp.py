@@ -47,7 +47,7 @@ class RMT:
 
             block.append(i+noise)
 
-        return blocks
+        return block
 
 
     def M2block(self,array,noise_level=100, noise=False):
@@ -75,17 +75,18 @@ class RMT:
 
             return blocks
 
-    def block2M(self,block_list):
+    def block2M(self,block_list,shuffling_seed=None):
 
         Row = []
 
         Column = []
 
-        blocks=block_list
+        blocks=block_list.copy()
 
         if self.shuffle:
-
-            random.shuffle(block_list)
+            if shuffling_seed is not None:
+                random.seed(shuffling_seed)
+            random.shuffle(blocks)
 
         for i in range(self.block_num):
 
@@ -103,7 +104,7 @@ class RMT:
 
         return np.vstack(Column)
 
-    def Encode(self,image,noise=True,noise_level=100,shuffling_seed=1):
+    def Encode(self,image,noise=True,noise_level=100,shuffling_seed=None):
 
         img = self.normalize(image)
 
@@ -113,7 +114,7 @@ class RMT:
 
             block_enc = [ np.matmul(blocks[i], self.RMT_Matrixes[i]) for i in range(len(blocks))]
 
-            return self.block2M(block_enc)
+            return self.block2M(block_enc, shuffling_seed=shuffling_seed)
 
         else:
 
@@ -125,7 +126,7 @@ class RMT:
 
                 block_enc = [ np.matmul(blocks[i], self.RMT_Matrixes[i]) for i in range(len(blocks))]
 
-                img2[:,:,c] = self.block2M(block_enc)
+                img2[:,:,c] = self.block2M(block_enc, shuffling_seed=shuffling_seed)
 
             return img2
 
@@ -224,7 +225,7 @@ class RMT:
         det = np.linalg.det(np.dot(X.T,X))
 
         if det == 0:
-
+            
             return []
 
         Xbar = np.dot(np.linalg.inv(np.dot(X.T,X)),X.T)
@@ -248,11 +249,11 @@ class RMT:
                 R=np.append(R,r,1)
 
         if np.linalg.det(R)==0:
-
+            
             return []
 
         else:
-
+            
             return R
 
     def Estimate_one_channel(self, Original, Encrypted):
@@ -534,16 +535,20 @@ class AES:
 
         return blocks
 
-    def block2M(self, block_list):
+    def block2M(self, block_list, shuffling_seed=None):
 
         Row = []
 
         Column = []
 
-        blocks = block_list
+        blocks = block_list.copy()
 
         if self.shuffle:
-            random.shuffle(block_list)
+            if shuffling_seed is not None:
+                random.seed(shuffling_seed)
+             # Mark blocks with their original index
+            random.shuffle(blocks)
+            # random.shuffle(blocks)
 
         for i in range(self.block_num):
 
@@ -575,7 +580,7 @@ class AES:
 
         return self.vector2M(block1)
 
-    def Encode(self, img, noise = False, noise_level = 1):
+    def Encode(self, img, noise = False, noise_level = 1, shuffling_seed = None):
 
         if (self.scale != [1, 1]):
 
@@ -601,7 +606,7 @@ class AES:
 
                     blocks_e = [self.block_enc(b, self.ciphers) for b in blocks]
 
-                img2[:, :, c] = self.block2M(blocks_e)
+                img2[:, :, c] = self.block2M(blocks_e, shuffling_seed=shuffling_seed)
 
         else:
 
@@ -617,7 +622,7 @@ class AES:
 
 
 
-            img2[:, :] = self.block2M(blocks_e)
+            img2[:, :] = self.block2M(blocks_e, shuffling_seed=shuffling_seed)
 
         return img2
 
